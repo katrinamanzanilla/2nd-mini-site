@@ -10,26 +10,7 @@ body {
   background-color: #f9f2f3; /* soft pastel pink */
   color: #3a3a3a;
   line-height: 1.6;
-  animation: page-fade 0.35s ease-in;
 }
-
-@keyframes page-fade {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body {
-    animation: none;
-  }
-}
-
 /* ---------- Header / Navbar ---------- */
 header {
   background: #f6ecee; /* light blush */
@@ -209,4 +190,5 @@ tr {
 .spacer {
   height: 40px;
 }
+
 
