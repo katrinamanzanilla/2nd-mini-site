@@ -1,55 +1,193 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>APEC Homes – PMG Portal</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+/* ---------- Base Reset ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
 
-<header>
-  <div class="logo">
-    <img src="logo.PNG" alt="APEC Homes Logo" class="logo-img">
-  </div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="glinks.html">G.Links</a>
-    <a href="downloadables.html">Downloadables</a>
-    <a href="tracker.html">Issue Tracker</a>
-    <a href="projstat.html">Project Status</a>
-  </nav>
-</header>
+body {
+  background-color: #f9f2f3; /* soft pastel pink */
+  color: #3a3a3a;
+  line-height: 1.6;
+}
 
-<section class="hero">
-  <div class="hero-text">
-    <h1>Centralized Access for Google Links, Manuals & Forms, Issues, and Project Overview</h1>
-    <a href="glinks.html" class="btn">View Links</a>
-  </div>
-  <div class="hero-image">
-    <img src="bg.jpg" alt="apec homes">
-  </div>
-</section>
+/* ---------- Header / Navbar ---------- */
+header {
+  background: #f6ecee; /* light blush */
+  padding: 20px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-<section class="cards">
-  <div class="card">
-    <h3>G.Links</h3>
-    <p>Quick access to important Google links</p>
-  </div>
-  <div class="card">
-    <h3>Downloadables</h3>
-    <p>Manuals, forms, and templates</p>
-  </div>
-  <div class="card">
-    <h3>Issue Tracker</h3>
-    <p>Report and track ongoing concerns</p>
-  </div>
-  <div class="card">
-    <h3>Project Status</h3>
-    <p>Overview of current project progress</p>
-  </div>
-</section>
+.logo {
+  font-size: 22px;
+  font-weight: 600;
+}
 
-</body>
-</html>
+.logo-img {
+  display: block;
+  max-height: 48px;
+  width: auto;
+}
 
+nav a {
+  margin: 0 12px;
+  text-decoration: none;
+  color: #5a5555;
+  font-size: 14px;
+  padding-bottom: 2px;
+  transition: color 0.2s ease, box-shadow 0.2s ease;
+}
 
+nav a:hover,
+nav a:focus-visible {
+  color: #3f3838;
+  box-shadow: inset 0 -2px 0 #d9aeb3;
+}
+
+nav a.active {
+  color: #3f3838;
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 #d9aeb3;
+}
+
+/* ---------- Hero Section ---------- */
+.hero {
+  display: flex;
+  gap: 40px;
+  padding: 60px;
+  background: linear-gradient(
+    135deg,
+    #f7e9ec,
+    #fdf7f8
+  ); /* pink gradient */
+  border-radius: 20px;
+  margin: 40px;
+}
+
+.hero-text {
+  flex: 1;
+}
+
+.hero-text h1 {
+  font-size: 34px;
+  margin-bottom: 20px;
+}
+
+.hero-text .btn {
+  margin-top: 30px;
+  display: inline-block;
+  padding: 12px 28px;
+  background: #e3bfc4; /* muted blush button */
+  color: #fff;
+  border-radius: 30px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.hero-image {
+  flex: 1;
+  background: linear-gradient(
+    180deg,
+    #f4e6e8,
+    #faf5f6
+  ); /* soft placeholder */
+  border-radius: 24px;
+  min-height: 200px;
+  max-height: 300px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.hero-image img {
+  width: 100%;
+  height: 120%;
+  object-fit: cover;
+  border-radius: 24px;
+  display: block;
+}
+
+/* ---------- Cards ---------- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 0 40px 60px;
+}
+
+.card {
+  background: #fffafa; /* warm off-white */
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(227,191,196,0.25);
+}
+
+.card h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.card p {
+  font-size: 13px;
+  color: #7a6f6f;
+}
+
+/* ---------- Page Container ---------- */
+.page {
+  margin: 40px;
+  background: #fffafa;
+  padding: 40px;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(227,191,196,0.25);
+}
+
+/* ---------- Tables ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  text-align: left;
+  padding: 14px;
+  font-size: 14px;
+}
+
+th {
+  color: #8a7f7f;
+  font-weight: 500;
+}
+
+tr {
+  border-bottom: 1px solid #f1dfe2;
+}
+
+/* ---------- Status Pills ---------- */
+.status {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.backlog { background: #f1e7e8; }
+.progress { background: #f5e1c8; }
+.pending { background: #f3d6d6; }
+
+/* ---------- Buttons ---------- */
+.small-btn {
+  padding: 8px 18px;
+  background: #ecd6d9;
+  border-radius: 20px;
+  font-size: 12px;
+  text-decoration: none;
+  color: #4a3f3f;
+}
+
+/* ---------- Footer Spacing ---------- */
+.spacer {
+  height: 40px;
+}
