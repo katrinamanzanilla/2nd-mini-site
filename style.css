@@ -26,7 +26,7 @@ header {
   font-weight: 600;
 }
 
-.logo img {
+.logo-img {
   display: block;
   max-height: 48px;
   width: auto;
@@ -181,4 +181,5 @@ tr {
 .spacer {
   height: 40px;
 }
+
 
