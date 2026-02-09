@@ -26,6 +26,12 @@ header {
   font-weight: 600;
 }
 
+.logo img {
+  display: block;
+  max-height: 48px;
+  width: auto;
+}
+
 nav a {
   margin: 0 12px;
   text-decoration: none;
@@ -175,3 +181,4 @@ tr {
 .spacer {
   height: 40px;
 }
+
