@@ -1,0 +1,165 @@
+/* ---------- Base Reset ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+body {
+  background-color: #f9f2f3; /* soft pastel pink */
+  color: #3a3a3a;
+  line-height: 1.6;
+}
+
+/* ---------- Header / Navbar ---------- */
+header {
+  background: #f6ecee; /* light blush */
+  padding: 20px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+nav a {
+  margin: 0 12px;
+  text-decoration: none;
+  color: #5a5555;
+  font-size: 14px;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Hero Section ---------- */
+.hero {
+  display: flex;
+  gap: 40px;
+  padding: 60px;
+  background: linear-gradient(
+    135deg,
+    #f7e9ec,
+    #fdf7f8
+  ); /* pink gradient */
+  border-radius: 20px;
+  margin: 40px;
+}
+
+.hero-text {
+  flex: 1;
+}
+
+.hero-text h1 {
+  font-size: 34px;
+  margin-bottom: 20px;
+}
+
+.hero-text .btn {
+  margin-top: 30px;
+  display: inline-block;
+  padding: 12px 28px;
+  background: #e3bfc4; /* muted blush button */
+  color: #fff;
+  border-radius: 30px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.hero-image {
+  flex: 1;
+  background: linear-gradient(
+    180deg,
+    #f4e6e8,
+    #faf5f6
+  ); /* soft placeholder */
+  border-radius: 18px;
+  min-height: 20px;
+}
+
+/* ---------- Cards ---------- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 0 40px 60px;
+}
+
+.card {
+  background: #fffafa; /* warm off-white */
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(227,191,196,0.25);
+}
+
+.card h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.card p {
+  font-size: 13px;
+  color: #7a6f6f;
+}
+
+/* ---------- Page Container ---------- */
+.page {
+  margin: 40px;
+  background: #fffafa;
+  padding: 40px;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(227,191,196,0.25);
+}
+
+/* ---------- Tables ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  text-align: left;
+  padding: 14px;
+  font-size: 14px;
+}
+
+th {
+  color: #8a7f7f;
+  font-weight: 500;
+}
+
+tr {
+  border-bottom: 1px solid #f1dfe2;
+}
+
+/* ---------- Status Pills ---------- */
+.status {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.backlog { background: #f1e7e8; }
+.progress { background: #f5e1c8; }
+.pending { background: #f3d6d6; }
+
+/* ---------- Buttons ---------- */
+.small-btn {
+  padding: 8px 18px;
+  background: #ecd6d9;
+  border-radius: 20px;
+  font-size: 12px;
+  text-decoration: none;
+  color: #4a3f3f;
+}
+
+/* ---------- Footer Spacing ---------- */
+.spacer {
+  height: 40px;
+}
