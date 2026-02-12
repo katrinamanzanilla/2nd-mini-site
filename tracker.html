@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Issue Tracker</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -20,32 +21,523 @@
   </nav>
 </header>
 
-<div class="page">
-  <h2>Issue Tracker</h2>
+<div class="page tracker-page">
+  <section class="tracker-hero">
+    <h2>IT PM Issue Tracker</h2>
+    <p class="helper-text">A simple space to log issues, assign owners, and track progress in real time.</p>
 
-  <table>
-    <tr>
-      <th>Title</th>
-      <th>Assigned To</th>
-      <th>Status</th>
-    </tr>
-    <tr>
-      <td>Updated Budget Issues</td>
-      <td>John Doe</td>
-      <td><span class="status backlog">Backlog</span></td>
-    </tr>
-    <tr>
-      <td>Design Revision Needed</td>
-      <td>Sarah Lee</td>
-      <td><span class="status progress">In Progress</span></td>
-    </tr>
-    <tr>
-      <td>Site Inspection Delayed</td>
-      <td>Mark Johnson</td>
-      <td><span class="status pending">Pending</span></td>
-    </tr>
-  </table>
+    <div class="quick-guide" role="note" aria-label="How to use this tracker">
+      <h3>Quick Start</h3>
+      <ol>
+        <li>Connect using any Google-hosted link (optional).</li>
+        <li>Add issues using the short form.</li>
+        <li>Update status directly in the table.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sheet-config" aria-label="Google Sheets connection">
+    <h3>Google Sync Link (Optional)</h3>
+    <p class="helper-text">If you skip this step, the tracker still works in your browser using local storage.</p>
+    <div class="config-grid">
+      <label for="sheetEndpoint">
+        Google Endpoint URL
+        <input id="sheetEndpoint" type="url" placeholder="https://<any-google-domain>/...">
+      </label>
+      <div class="sync-actions">
+        <button id="saveEndpoint" type="button" class="small-btn cta-btn">Connect</button>
+        <button id="clearEndpoint" type="button" class="small-btn secondary-btn">Use Local Only</button>
+      </div>
+    </div>
+    <details class="integration-help">
+      <summary>Integration format</summary>
+      <p>Supported Google link formats:</p>
+      <ul>
+        <li>JSON response with <code>{ issues: [...] }</code> or direct array</li>
+        <li>Published CSV/Google Sheet link with headers (title, assignee, status, priority, dueDate, details)</li>
+        <li>Optional write endpoints: <code>POST action=create</code>, <code>updateStatus</code>, <code>delete</code></li>
+      </ul>
+    </details>
+    <p id="syncMessage" class="form-message" aria-live="polite"></p>
+  </section>
+
+  <section class="tracker-stats" aria-label="Issue summary">
+    <article class="stat-card"><p>Total Issues</p><h4 id="totalCount">0</h4></article>
+    <article class="stat-card"><p>Open</p><h4 id="openCount">0</h4></article>
+    <article class="stat-card"><p>In Progress</p><h4 id="progressCount">0</h4></article>
+    <article class="stat-card"><p>Resolved</p><h4 id="resolvedCount">0</h4></article>
+  </section>
+
+  <section class="tracker-layout">
+    <form id="issueForm" class="link-form issue-form" aria-label="Add issue form">
+      <h3>Add New Issue</h3>
+      <div class="issue-grid">
+        <label for="issueTitle">
+          Issue Title *
+          <input id="issueTitle" type="text" required placeholder="e.g. VPN access not working">
+        </label>
+        <label for="issueAssignee">
+          Assignee *
+          <input id="issueAssignee" type="text" required placeholder="e.g. Network Team">
+        </label>
+        <label for="issuePriority">
+          Priority
+          <select id="issuePriority" required>
+            <option value="High">High</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </label>
+        <label for="issueDueDate">
+          Due Date *
+          <input id="issueDueDate" type="date" required>
+        </label>
+        <label for="issueDetails" class="full-row">
+          Details
+          <textarea id="issueDetails" rows="3" placeholder="Add impact, symptoms, or next steps."></textarea>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button class="small-btn cta-btn" type="submit">+ Add Issue</button>
+        <button class="small-btn secondary-btn" id="clearForm" type="button">Clear</button>
+      </div>
+      <p id="formMessage" class="form-message" aria-live="polite"></p>
+    </form>
+
+    <div class="issue-board">
+      <section class="link-filters issue-filters" aria-label="Issue filters">
+        <div class="search-wrap">
+          <label for="issueSearch">Search Issues</label>
+          <input id="issueSearch" type="search" placeholder="Search by title or assignee...">
+        </div>
+        <div class="platform-tags" aria-label="Filter by status">
+          <button class="platform-filter active" data-filter="all" type="button">All</button>
+          <button class="platform-filter" data-filter="Open" type="button">Open</button>
+          <button class="platform-filter" data-filter="In Progress" type="button">In Progress</button>
+          <button class="platform-filter" data-filter="Blocked" type="button">Blocked</button>
+          <button class="platform-filter" data-filter="Resolved" type="button">Resolved</button>
+        </div>
+      </section>
+
+      <div class="table-wrap">
+        <table aria-label="Issue tracker table">
+          <thead>
+            <tr>
+              <th>Issue</th>
+              <th>Assignee</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Due Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="issueTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 </div>
+
+<script>
+  const STORAGE_KEY = "itpm_tracker_issues";
+  const ENDPOINT_KEY = "itpm_tracker_endpoint";
+
+  const demoIssues = [
+    {
+      id: crypto.randomUUID(),
+      title: "SSO login fails for finance users",
+      assignee: "Identity Management Team",
+      priority: "High",
+      status: "Open",
+      dueDate: "2026-02-18",
+      details: "Affected users receive MFA timeout during peak hours.",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: crypto.randomUUID(),
+      title: "Weekly report automation delayed",
+      assignee: "PMO Automation",
+      priority: "Medium",
+      status: "In Progress",
+      dueDate: "2026-02-20",
+      details: "Apps Script trigger execution takes over 15 minutes.",
+      createdAt: new Date().toISOString()
+    }
+  ];
+
+  const state = {
+    issues: [],
+    search: "",
+    statusFilter: "all",
+    endpoint: ""
+  };
+
+  const statusClassMap = {
+    "Open": "open-status",
+    "In Progress": "progress-status",
+    "Blocked": "blocked-status",
+    "Resolved": "resolved-status"
+  };
+
+  const GOOGLE_HOST_SUFFIXES = [
+    "google.com",
+    "googleapis.com",
+    "googleusercontent.com",
+    "g.co",
+    "withgoogle.com"
+  ];
+
+  function isGoogleLink(url) {
+    try {
+      const parsed = new URL(url);
+      const host = parsed.hostname.replace(/^www\./, "").toLowerCase();
+      return GOOGLE_HOST_SUFFIXES.some((suffix) => host === suffix || host.endsWith(`.${suffix}`));
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function setMessage(targetId, text, isError = false) {
+    const node = document.getElementById(targetId);
+    node.textContent = text;
+    node.classList.toggle("error", isError);
+  }
+
+  function normalizeIssue(raw) {
+    return {
+      id: raw.id || crypto.randomUUID(),
+      title: raw.title || "Untitled Issue",
+      assignee: raw.assignee || "Unassigned",
+      priority: raw.priority || "Medium",
+      status: raw.status || "Open",
+      dueDate: raw.dueDate || "",
+      details: raw.details || "",
+      createdAt: raw.createdAt || new Date().toISOString()
+    };
+  }
+
+  function readLocalIssues() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(demoIssues));
+      return [...demoIssues];
+    }
+
+    try {
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed.map(normalizeIssue) : [...demoIssues];
+    } catch (error) {
+      return [...demoIssues];
+    }
+  }
+
+  function writeLocalIssues(issues) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(issues));
+  }
+
+  function parseCsv(text) {
+    const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(",").map((h) => h.trim());
+
+    return lines.slice(1).map((line) => {
+      const values = line.split(",");
+      const row = {};
+      headers.forEach((header, index) => {
+        row[header] = (values[index] || "").trim();
+      });
+      return row;
+    });
+  }
+
+  function coerceIssues(payload) {
+    if (!payload) return [];
+    if (Array.isArray(payload)) return payload.map(normalizeIssue);
+
+    if (Array.isArray(payload.issues)) return payload.issues.map(normalizeIssue);
+    if (Array.isArray(payload.rows)) return payload.rows.map(normalizeIssue);
+    if (Array.isArray(payload.data)) return payload.data.map(normalizeIssue);
+
+    return [];
+  }
+
+  async function fetchIssuesFromGoogleLink() {
+    if (!state.endpoint) return [];
+
+    const candidates = [`${state.endpoint}${state.endpoint.includes("?") ? "&" : "?"}action=list`, state.endpoint];
+
+    for (const url of candidates) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) continue;
+
+        const text = await response.text();
+        try {
+          const json = JSON.parse(text);
+          const jsonIssues = coerceIssues(json);
+          if (jsonIssues.length) return jsonIssues;
+        } catch (error) {
+          const csvRows = parseCsv(text);
+          const csvIssues = csvRows.map((row) => normalizeIssue({
+            title: row.title || row.issue || row.summary || row.name,
+            assignee: row.assignee || row.owner || row.assignedTo,
+            priority: row.priority,
+            status: row.status,
+            dueDate: row.dueDate || row.due || row.targetDate,
+            details: row.details || row.description
+          }));
+          if (csvIssues.length) return csvIssues;
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+
+    return [];
+  }
+
+  async function requestSheet(action, payload = {}, method = "POST") {
+    if (!state.endpoint) throw new Error("Missing endpoint.");
+
+    const response = await fetch(state.endpoint, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, ...payload })
+    });
+
+    if (!response.ok) throw new Error("Google write request failed.");
+    return response.json();
+  }
+
+  function getVisibleIssues() {
+    const term = state.search.trim().toLowerCase();
+
+    return state.issues.filter((issue) => {
+      const matchesFilter = state.statusFilter === "all" || issue.status === state.statusFilter;
+      const matchesSearch = !term || issue.title.toLowerCase().includes(term) || issue.assignee.toLowerCase().includes(term);
+      return matchesFilter && matchesSearch;
+    });
+  }
+
+  function renderStats() {
+    const total = state.issues.length;
+    const open = state.issues.filter((item) => item.status === "Open").length;
+    const inProgress = state.issues.filter((item) => item.status === "In Progress").length;
+    const resolved = state.issues.filter((item) => item.status === "Resolved").length;
+
+    document.getElementById("totalCount").textContent = total;
+    document.getElementById("openCount").textContent = open;
+    document.getElementById("progressCount").textContent = inProgress;
+    document.getElementById("resolvedCount").textContent = resolved;
+  }
+
+  function renderIssues() {
+    const tbody = document.getElementById("issueTableBody");
+    const issues = getVisibleIssues();
+
+    if (!issues.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="empty-cell">
+            <strong>No issues found.</strong>
+            <p class="issue-subtext">Try a different filter, clear search, or add a new issue.</p>
+          </td>
+        </tr>
+      `;
+      renderStats();
+      return;
+    }
+
+    tbody.innerHTML = issues.map((issue) => {
+      const dueDate = issue.dueDate ? new Date(issue.dueDate).toLocaleDateString() : "-";
+
+      return `
+        <tr>
+          <td>
+            <strong>${issue.title}</strong>
+            <p class="issue-subtext">${issue.details || "No details provided."}</p>
+          </td>
+          <td>${issue.assignee}</td>
+          <td><span class="priority-chip ${issue.priority.toLowerCase()}">${issue.priority}</span></td>
+          <td>
+            <select class="status-select ${statusClassMap[issue.status] || "open-status"}" data-id="${issue.id}" aria-label="Update issue status">
+              <option value="Open" ${issue.status === "Open" ? "selected" : ""}>Open</option>
+              <option value="In Progress" ${issue.status === "In Progress" ? "selected" : ""}>In Progress</option>
+              <option value="Blocked" ${issue.status === "Blocked" ? "selected" : ""}>Blocked</option>
+              <option value="Resolved" ${issue.status === "Resolved" ? "selected" : ""}>Resolved</option>
+            </select>
+          </td>
+          <td>${dueDate}</td>
+          <td>
+            <button class="delete-btn" type="button" data-action="delete" data-id="${issue.id}">Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    renderStats();
+  }
+
+  async function loadIssues() {
+    try {
+      if (state.endpoint) {
+        const remoteIssues = await fetchIssuesFromGoogleLink();
+        if (remoteIssues.length) {
+          state.issues = remoteIssues;
+          renderIssues();
+          setMessage("syncMessage", "Connected. Issue data loaded from Google link.");
+          return;
+        }
+
+        setMessage("syncMessage", "Connected, but no readable rows found. Showing local data.");
+      }
+
+      state.issues = readLocalIssues();
+      renderIssues();
+    } catch (error) {
+      state.issues = readLocalIssues();
+      setMessage("syncMessage", "Could not read that Google link. Using local mode.", true);
+      renderIssues();
+    }
+  }
+
+  async function syncCreate(issue) {
+    if (!state.endpoint) return;
+    await requestSheet("create", { issue });
+  }
+
+  async function syncStatus(id, status) {
+    if (!state.endpoint) return;
+    await requestSheet("updateStatus", { id, status });
+  }
+
+  async function syncDelete(id) {
+    if (!state.endpoint) return;
+    await requestSheet("delete", { id });
+  }
+
+  function initializeEndpoint() {
+    const stored = (localStorage.getItem(ENDPOINT_KEY) || "").trim();
+    state.endpoint = stored;
+    document.getElementById("sheetEndpoint").value = stored;
+  }
+
+  document.getElementById("saveEndpoint").addEventListener("click", async () => {
+    const endpoint = document.getElementById("sheetEndpoint").value.trim();
+
+    if (endpoint && !isGoogleLink(endpoint)) {
+      setMessage("syncMessage", "Please enter a valid Google link.", true);
+      return;
+    }
+
+    localStorage.setItem(ENDPOINT_KEY, endpoint);
+    state.endpoint = endpoint;
+    setMessage("syncMessage", endpoint ? "Connected. Loading sheet data..." : "Google sync disabled. Using local mode.");
+    await loadIssues();
+  });
+
+  document.getElementById("clearEndpoint").addEventListener("click", async () => {
+    document.getElementById("sheetEndpoint").value = "";
+    localStorage.setItem(ENDPOINT_KEY, "");
+    state.endpoint = "";
+    setMessage("syncMessage", "Local mode enabled.");
+    await loadIssues();
+  });
+
+  document.getElementById("clearForm").addEventListener("click", () => {
+    document.getElementById("issueForm").reset();
+    setMessage("formMessage", "Form cleared.");
+  });
+
+  document.getElementById("issueForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const issue = normalizeIssue({
+      id: crypto.randomUUID(),
+      title: document.getElementById("issueTitle").value.trim(),
+      assignee: document.getElementById("issueAssignee").value.trim(),
+      priority: document.getElementById("issuePriority").value,
+      dueDate: document.getElementById("issueDueDate").value,
+      details: document.getElementById("issueDetails").value.trim(),
+      status: "Open",
+      createdAt: new Date().toISOString()
+    });
+
+    if (!issue.title || !issue.assignee || !issue.dueDate) {
+      setMessage("formMessage", "Please complete all required fields.", true);
+      return;
+    }
+
+    state.issues.unshift(issue);
+    writeLocalIssues(state.issues);
+    renderIssues();
+    event.target.reset();
+
+    try {
+      await syncCreate(issue);
+      if (state.endpoint) setMessage("syncMessage", "Issue synced to Google Sheets.");
+      setMessage("formMessage", "Issue added successfully.");
+    } catch (error) {
+      setMessage("formMessage", "Issue saved locally. Google sync failed.", true);
+    }
+  });
+
+  document.getElementById("issueSearch").addEventListener("input", (event) => {
+    state.search = event.target.value;
+    renderIssues();
+  });
+
+  document.querySelectorAll(".platform-filter").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.statusFilter = button.dataset.filter;
+      document.querySelectorAll(".platform-filter").forEach((node) => {
+        node.classList.toggle("active", node === button);
+      });
+      renderIssues();
+    });
+  });
+
+  document.getElementById("issueTableBody").addEventListener("change", async (event) => {
+    const select = event.target.closest(".status-select");
+    if (!select) return;
+
+    const issue = state.issues.find((item) => item.id === select.dataset.id);
+    if (!issue) return;
+
+    issue.status = select.value;
+    writeLocalIssues(state.issues);
+    renderIssues();
+
+    try {
+      await syncStatus(issue.id, issue.status);
+      if (state.endpoint) setMessage("syncMessage", "Status synced to Google Sheets.");
+    } catch (error) {
+      setMessage("syncMessage", "Status changed locally. Google sync failed.", true);
+    }
+  });
+
+  document.getElementById("issueTableBody").addEventListener("click", async (event) => {
+    const button = event.target.closest("button[data-action='delete']");
+    if (!button) return;
+
+    if (!confirm("Delete this issue?")) return;
+
+    const { id } = button.dataset;
+    state.issues = state.issues.filter((item) => item.id !== id);
+    writeLocalIssues(state.issues);
+    renderIssues();
+
+    try {
+      await syncDelete(id);
+      if (state.endpoint) setMessage("syncMessage", "Issue deleted from Google Sheets.");
+    } catch (error) {
+      setMessage("syncMessage", "Issue deleted locally. Google sync failed.", true);
+    }
+  });
+
+  initializeEndpoint();
+  loadIssues();
+</script>
 
 </body>
 </html>
