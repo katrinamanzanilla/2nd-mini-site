@@ -413,3 +413,34 @@ tr {
 .delete-btn:focus-visible {
   transform: translateY(-1px);
 }
+
+/* ---------- G.Links Filters ---------- */
+.link-filters {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.search-wrap {
+  display: grid;
+  gap: 6px;
+}
+
+.search-wrap label {
+  font-size: 13px;
+  color: #6a5b5d;
+  font-weight: 500;
+}
+
+.search-wrap input {
+  width: 100%;
+  border: 1px solid #e8d0d3;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.search-wrap input:focus-visible {
+  outline: 2px solid #e6c5cb;
+  border-color: #dfb2ba;
+}
