@@ -24,17 +24,7 @@
 <div class="page glinks-page">
   <div class="glinks-hero">
     <h2>Google Links Container</h2>
-    <p class="helper-text">Centralized space for IT PM links across Google platforms.</p>
-    <div class="platform-tags" aria-label="Filter links by Google platform">
-      <button class="platform-filter active" type="button" data-filter="all">All</button>
-      <button class="platform-filter" type="button" data-filter="docs">Docs</button>
-      <button class="platform-filter" type="button" data-filter="sheets">Sheets</button>
-      <button class="platform-filter" type="button" data-filter="drive">Drive</button>
-      <button class="platform-filter" type="button" data-filter="meet">Meet</button>
-      <button class="platform-filter" type="button" data-filter="forms">Forms</button>
-      <button class="platform-filter" type="button" data-filter="calendar">Calendar</button>
-      <button class="platform-filter" type="button" data-filter="sites">Sites</button>
-    </div>
+    <p class="helper-text">Centralized space for IT PMG links across Google platforms.</p>
   </div>
 
   <div class="links-container">
@@ -54,6 +44,23 @@
       <p id="formMessage" class="form-message" aria-live="polite"></p>
     </form>
 
+    <section class="link-filters" aria-label="Link filters">
+      <div class="search-wrap">
+        <label for="linkSearch">Search by Link Name</label>
+        <input id="linkSearch" type="search" placeholder="Type a link name to filter...">
+      </div>
+      <div class="platform-tags" aria-label="Filter links by Google platform">
+        <button class="platform-filter active" type="button" data-filter="all">All</button>
+        <button class="platform-filter" type="button" data-filter="docs">Docs</button>
+        <button class="platform-filter" type="button" data-filter="sheets">Sheets</button>
+        <button class="platform-filter" type="button" data-filter="drive">Drive</button>
+        <button class="platform-filter" type="button" data-filter="meet">Meet</button>
+        <button class="platform-filter" type="button" data-filter="forms">Forms</button>
+        <button class="platform-filter" type="button" data-filter="calendar">Calendar</button>
+        <button class="platform-filter" type="button" data-filter="sites">Sites</button>
+      </div>
+    </section>
+
     <div class="table-wrap">
       <table aria-label="Google links table">
         <thead>
@@ -72,6 +79,7 @@
 <script>
   const STORAGE_KEY = "itpm_google_links";
   let currentFilter = "all";
+  let currentSearch = "";
 
   const defaults = [
     { name: "Project Documents Folder", url: "https://drive.google.com/" },
@@ -92,10 +100,7 @@
     try {
       const parsed = new URL(url);
       const host = parsed.hostname.replace(/^www\./, "");
-
-      return GOOGLE_HOST_SUFFIXES.some((suffix) => {
-        return host === suffix || host.endsWith(`.${suffix}`);
-      });
+      return GOOGLE_HOST_SUFFIXES.some((suffix) => host === suffix || host.endsWith(`.${suffix}`));
     } catch (error) {
       return false;
     }
@@ -115,7 +120,6 @@
       if (host.includes("forms.google.com")) return "forms";
       if (host.includes("calendar.google.com")) return "calendar";
       if (host.includes("sites.google.com")) return "sites";
-
       return "other";
     } catch (error) {
       return "other";
@@ -142,13 +146,10 @@
   }
 
   function getFilteredLinks(links) {
-    if (currentFilter === "all") {
-      return links.map((item, index) => ({ item, index }));
-    }
-
     return links
       .map((item, index) => ({ item, index }))
-      .filter(({ item }) => detectPlatform(item.url) === currentFilter);
+      .filter(({ item }) => currentFilter === "all" || detectPlatform(item.url) === currentFilter)
+      .filter(({ item }) => item.name.toLowerCase().includes(currentSearch));
   }
 
   function renderRows() {
@@ -157,8 +158,7 @@
     const filteredLinks = getFilteredLinks(links);
 
     if (filteredLinks.length === 0) {
-      const filterText = currentFilter === "all" ? "" : ` for ${currentFilter}`;
-      tbody.innerHTML = `<tr><td colspan="3">No links found${filterText}. Add a Google link above.</td></tr>`;
+      tbody.innerHTML = '<tr><td colspan="3">No links match your current filters. Try another platform or search term.</td></tr>';
       return;
     }
 
@@ -181,9 +181,8 @@
 
   function applyFilter(filter) {
     currentFilter = filter;
-    const buttons = document.querySelectorAll(".platform-filter");
 
-    buttons.forEach((button) => {
+    document.querySelectorAll(".platform-filter").forEach((button) => {
       button.classList.toggle("active", button.dataset.filter === filter);
     });
 
@@ -191,9 +190,12 @@
   }
 
   document.querySelectorAll(".platform-filter").forEach((button) => {
-    button.addEventListener("click", () => {
-      applyFilter(button.dataset.filter);
-    });
+    button.addEventListener("click", () => applyFilter(button.dataset.filter));
+  });
+
+  document.getElementById("linkSearch").addEventListener("input", (event) => {
+    currentSearch = event.target.value.trim().toLowerCase();
+    renderRows();
   });
 
   document.getElementById("linkForm").addEventListener("submit", (event) => {
