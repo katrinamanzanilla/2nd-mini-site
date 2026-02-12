@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>G.Links</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -10,7 +11,6 @@
 <header>
   <div class="logo">
     <a href="index.html"><img src="logo.PNG" alt="APEC homes" class="logo-img"></a>
-  
   </div>
   <nav>
     <a href="index.html">Home</a>
@@ -21,19 +21,226 @@
   </nav>
 </header>
 
-<div class="page">
-  <h2>Quick Access to Google Links</h2>
+<div class="page glinks-page">
+  <div class="glinks-hero">
+    <h2>Google Links Container</h2>
+    <p class="helper-text">Centralized space for IT PM links across Google platforms.</p>
+    <div class="platform-tags" aria-label="Filter links by Google platform">
+      <button class="platform-filter active" type="button" data-filter="all">All</button>
+      <button class="platform-filter" type="button" data-filter="docs">Docs</button>
+      <button class="platform-filter" type="button" data-filter="sheets">Sheets</button>
+      <button class="platform-filter" type="button" data-filter="drive">Drive</button>
+      <button class="platform-filter" type="button" data-filter="meet">Meet</button>
+      <button class="platform-filter" type="button" data-filter="forms">Forms</button>
+      <button class="platform-filter" type="button" data-filter="calendar">Calendar</button>
+      <button class="platform-filter" type="button" data-filter="sites">Sites</button>
+    </div>
+  </div>
 
-  <table>
-    <tr><td>📁 Project Documents</td></tr>
-    <tr><td>📊 Client Presentations</td></tr>
-    <tr><td>👥 Team Collaboration</td></tr>
-    <tr><td>📚 Reference Materials</td></tr>
-  </table>
+  <div class="links-container">
+    <form id="linkForm" class="link-form">
+      <h3>Add a New Google Link</h3>
+      <div class="form-grid">
+        <label>
+          Link Name
+          <input id="linkName" type="text" placeholder="e.g. Weekly Status Sheet" required>
+        </label>
+        <label>
+          Google URL
+          <input id="linkUrl" type="url" placeholder="https://calendar.google.com/..." required>
+        </label>
+      </div>
+      <button type="submit" class="small-btn cta-btn">+ Add Google Link</button>
+      <p id="formMessage" class="form-message" aria-live="polite"></p>
+    </form>
 
-  <div class="spacer"></div>
-  <a class="small-btn">+ Add New Link</a>
+    <div class="table-wrap">
+      <table aria-label="Google links table">
+        <thead>
+          <tr>
+            <th>Link Name</th>
+            <th>Google Link</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="linksTableBody"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
+
+<script>
+  const STORAGE_KEY = "itpm_google_links";
+  let currentFilter = "all";
+
+  const defaults = [
+    { name: "Project Documents Folder", url: "https://drive.google.com/" },
+    { name: "Client Presentation Deck", url: "https://docs.google.com/presentation/" },
+    { name: "Team Task Tracker", url: "https://docs.google.com/spreadsheets/" },
+    { name: "Daily Standup Meet", url: "https://meet.google.com/" }
+  ];
+
+  const GOOGLE_HOST_SUFFIXES = [
+    "google.com",
+    "googleapis.com",
+    "googleusercontent.com",
+    "g.co",
+    "withgoogle.com"
+  ];
+
+  function isGoogleLink(url) {
+    try {
+      const parsed = new URL(url);
+      const host = parsed.hostname.replace(/^www\./, "");
+
+      return GOOGLE_HOST_SUFFIXES.some((suffix) => {
+        return host === suffix || host.endsWith(`.${suffix}`);
+      });
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function detectPlatform(url) {
+    try {
+      const parsed = new URL(url);
+      const host = parsed.hostname.replace(/^www\./, "").toLowerCase();
+      const full = `${host}${parsed.pathname}`.toLowerCase();
+
+      if (host.includes("docs.google.com") && full.includes("/forms")) return "forms";
+      if (host.includes("docs.google.com") && full.includes("/spreadsheets")) return "sheets";
+      if (host.includes("docs.google.com")) return "docs";
+      if (host.includes("drive.google.com")) return "drive";
+      if (host.includes("meet.google.com")) return "meet";
+      if (host.includes("forms.google.com")) return "forms";
+      if (host.includes("calendar.google.com")) return "calendar";
+      if (host.includes("sites.google.com")) return "sites";
+
+      return "other";
+    } catch (error) {
+      return "other";
+    }
+  }
+
+  function loadLinks() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+      return [...defaults];
+    }
+
+    try {
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : [...defaults];
+    } catch (error) {
+      return [...defaults];
+    }
+  }
+
+  function saveLinks(links) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+  }
+
+  function getFilteredLinks(links) {
+    if (currentFilter === "all") {
+      return links.map((item, index) => ({ item, index }));
+    }
+
+    return links
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => detectPlatform(item.url) === currentFilter);
+  }
+
+  function renderRows() {
+    const tbody = document.getElementById("linksTableBody");
+    const links = loadLinks();
+    const filteredLinks = getFilteredLinks(links);
+
+    if (filteredLinks.length === 0) {
+      const filterText = currentFilter === "all" ? "" : ` for ${currentFilter}`;
+      tbody.innerHTML = `<tr><td colspan="3">No links found${filterText}. Add a Google link above.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filteredLinks
+      .map(({ item, index }) => `
+        <tr>
+          <td>${item.name}</td>
+          <td><a href="${item.url}" target="_blank" rel="noopener noreferrer">Open link</a></td>
+          <td><button class="delete-btn" data-index="${index}" type="button">Remove</button></td>
+        </tr>
+      `)
+      .join("");
+  }
+
+  function setMessage(text, isError = false) {
+    const message = document.getElementById("formMessage");
+    message.textContent = text;
+    message.classList.toggle("error", isError);
+  }
+
+  function applyFilter(filter) {
+    currentFilter = filter;
+    const buttons = document.querySelectorAll(".platform-filter");
+
+    buttons.forEach((button) => {
+      button.classList.toggle("active", button.dataset.filter === filter);
+    });
+
+    renderRows();
+  }
+
+  document.querySelectorAll(".platform-filter").forEach((button) => {
+    button.addEventListener("click", () => {
+      applyFilter(button.dataset.filter);
+    });
+  });
+
+  document.getElementById("linkForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const nameInput = document.getElementById("linkName");
+    const urlInput = document.getElementById("linkUrl");
+    const name = nameInput.value.trim();
+    const url = urlInput.value.trim();
+
+    if (!name || !url) {
+      setMessage("Please enter both a link name and URL.", true);
+      return;
+    }
+
+    if (!isGoogleLink(url)) {
+      setMessage("Please use a valid Google-platform link (e.g., google.com, g.co, googleapis.com).", true);
+      return;
+    }
+
+    const links = loadLinks();
+    links.push({ name, url });
+    saveLinks(links);
+    renderRows();
+
+    nameInput.value = "";
+    urlInput.value = "";
+    setMessage("Google link added successfully.");
+  });
+
+  document.getElementById("linksTableBody").addEventListener("click", (event) => {
+    const button = event.target.closest("button.delete-btn");
+    if (!button) return;
+
+    const index = Number(button.dataset.index);
+    const links = loadLinks();
+
+    if (Number.isNaN(index) || index < 0 || index >= links.length) return;
+
+    links.splice(index, 1);
+    saveLinks(links);
+    renderRows();
+    setMessage("Link removed.");
+  });
+
+  renderRows();
+</script>
 
 </body>
 </html>
