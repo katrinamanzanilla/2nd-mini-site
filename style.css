@@ -210,3 +210,206 @@ tr {
 .spacer {
   height: 40px;
 }
+
+/* ---------- G.Links ---------- */
+.helper-text {
+  margin-top: 8px;
+  color: #7a6f6f;
+  font-size: 14px;
+}
+
+.links-container {
+  margin-top: 20px;
+}
+
+.link-form {
+  background: #fdf6f7;
+  border: 1px solid #f1dfe2;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #5a5555;
+}
+
+.form-grid input {
+  border: 1px solid #e8d0d3;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.form-message {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #5b7e4b;
+}
+
+.form-message.error {
+  color: #a13f56;
+}
+
+.delete-btn {
+  border: none;
+  background: #f3d6d6;
+  color: #5a5555;
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.delete-btn:hover,
+.delete-btn:focus-visible {
+  background: #efc7cd;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  header {
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .page,
+  .hero {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+    padding: 0 20px 30px;
+  }
+}
+
+/* ---------- G.Links Visual Refresh ---------- */
+.glinks-page {
+  background: linear-gradient(180deg, #fffafb 0%, #fff6f8 100%);
+}
+
+.glinks-hero {
+  background: linear-gradient(130deg, #f9ebee 0%, #fef9fa 70%);
+  border: 1px solid #f0dde0;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.glinks-hero h2 {
+  margin-bottom: 6px;
+}
+
+.platform-tags {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.platform-filter {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #f5e3e6;
+  color: #6b595c;
+  font-size: 12px;
+  border: 1px solid #ebd2d6;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, color 0.2s ease;
+}
+
+.platform-filter:hover,
+.platform-filter:focus-visible {
+  background: #efd7db;
+  transform: translateY(-1px);
+}
+
+.platform-filter.active {
+  background: #e3bfc4;
+  color: #fff;
+  border-color: #deb1b8;
+}
+
+.link-form {
+  box-shadow: 0 10px 24px rgba(227,191,196,0.2);
+}
+
+.link-form h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #5b4e4f;
+}
+
+.form-grid input:focus-visible {
+  outline: 2px solid #e6c5cb;
+  border-color: #dfb2ba;
+}
+
+.cta-btn {
+  border: none;
+  box-shadow: 0 5px 14px rgba(227,191,196,0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cta-btn:hover,
+.cta-btn:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(227,191,196,0.4);
+}
+
+.table-wrap {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #f1dfe2;
+  overflow: hidden;
+}
+
+.table-wrap table {
+  margin-top: 0;
+}
+
+.table-wrap thead {
+  background: #fbf2f4;
+}
+
+.table-wrap tbody tr:hover {
+  background: #fff7f8;
+}
+
+.table-wrap a {
+  color: #8c5560;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.table-wrap a:hover,
+.table-wrap a:focus-visible {
+  text-decoration: underline;
+}
+
+.delete-btn {
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.delete-btn:hover,
+.delete-btn:focus-visible {
+  transform: translateY(-1px);
+}
