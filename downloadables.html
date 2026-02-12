@@ -1,43 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Downloadables</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PMG Portal</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <a href="index.html"><img src="logo.PNG" alt="APEC homes" class="logo-img"></a>
-  </div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="glinks.html">G.Links</a>
-    <a href="downloadables.html" class="active">Downloadables</a>
-    <a href="tracker.html">Issue Tracker</a>
-    <a href="projstat.html">Project Status</a>
-  </nav>
-</header>
+  <header class="navbar">
+    <div class="logo">
+      <a href="index.html" class="active"><img src="logo.PNG" alt="APEC" class="logo-img"></a>
+    </div>
 
-<div class="page">
-  <h2>Manuals and Forms</h2>
+    <nav class="nav-links">
+      <a href="index.html">HOME</a>
+      <a href="glinks.html">G.LINKS</a>
+      <a href="downloadables.html" class="active">DOWNLOADABLES</a>
+      <a href="tracker.html">ISSUE TRACKER</a>
+      <a href="projstat.html">PROJECT STATUS</a>
+    </nav>
 
-  <table>
-    <tr>
-      <td>Project Guidelines.pdf</td>
-      <td><a class="small-btn">Download</a></td>
-    </tr>
-    <tr>
-      <td>Design Forms.docx</td>
-      <td><a class="small-btn">Download</a></td>
-    </tr>
-    <tr>
-      <td>Safety Protocols.pdf</td>
-      <td><a class="small-btn">Download</a></td>
-    </tr>
-  </table>
-</div>
+    <div class="status">APEC HOMES</div>
+  </header>
+
+
+  <main class="content">
+    <div class="container downloadables-container">
+      <h1 class="page-title">Downloadable Manuals & Forms</h1>
+      <p class="downloadables-intro">Quick access to official Manuals and Forms.</p>
+
+      <div class="download-grid">
+        <section class="download-card">
+          <h2 class="section-title">Manuals</h2>
+          <a
+            class="drive-button"
+            href="https://drive.google.com/drive/folders/1Gp2pY8K6b7m6Thhf3xJFnlj-Rii5Y5uR?usp=drive_link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open Downloadble Manuals in Google Drive
+          </a>
+        </section>
+
+        <section class="download-card">
+          <h2 class="section-title">Forms</h2>
+          <a
+            class="drive-button"
+            href="https://drive.google.com/drive/folders/1erg6RGCKC6FIDZ79eZiTyGBYWMnKlZ6v?usp=drive_link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open Downloadable Google Forms
+          </a>
+        </section>
+      </div>
+
+      <section class="download-card custom-downloads" aria-label="Custom file downloader">
+        <h2 class="section-title">Google File Downloader</h2>
+
+        <div class="file-input-row">
+          <input
+            type="url"
+            id="fileLink"
+            class="file-control"
+            placeholder="Enter Google File Link"
+            aria-label="Google file link"
+          />
+
+          <select id="fileCategory" class="file-control" aria-label="File category">
+            <option value="Docs">Docs</option>
+            <option value="Sheets">Sheets</option>
+            <option value="Excel">Excel</option>
+            <option value="Sites">Sites</option>
+            <option value="Others">Others</option>
+          </select>
+
+          <button id="addFileBtn" class="drive-button" type="button">Add File</button>
+        </div>
+
+        <div class="download-table-wrap">
+          <table class="download-table" aria-live="polite">
+            <thead>
+              <tr>
+                <th scope="col">File Name</th>
+                <th scope="col">Category</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody id="fileTableBody">
+              <tr>
+                <td colspan="3" class="empty-state">No files added yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const fileDownloaderApp = (() => {
+      const createFileStore = () => {
+        const records = [];
+
+        return {
+          add(record) {
+            records.push(record);
+          },
+          getAll() {
+            return [...records];
+          }
+        };
+      };
+
+      const selectors = {
+        fileLinkInput: document.getElementById('fileLink'),
+        fileCategorySelect: document.getElementById('fileCategory'),
+        addButton: document.getElementById('addFileBtn'),
+        tableBody: document.getElementById('fileTableBody')
+      };
+
+      const GOOGLE_LINK_MESSAGE = 'Please enter a valid Google link.';
+      const store = createFileStore();
+
+      const getGoogleFileId = (url) => {
+        const pathMatch = url.pathname.match(/\/d\/([^/]+)/);
+        if (pathMatch && pathMatch[1]) {
+          return pathMatch[1];
+        }
+
+        return url.searchParams.get('id') || '';
+      };
+
+      const extractReadableName = (url, category) => {
+        const fileId = getGoogleFileId(url);
+        const pathPart = url.pathname.split('/').filter(Boolean).pop();
+        const ignoredPathTokens = new Set(['view', 'edit', 'preview', 'copy', 'open', 'u']);
+
+        if (pathPart && !ignoredPathTokens.has(pathPart.toLowerCase())) {
+          return decodeURIComponent(pathPart.replace(/[-_]+/g, ' '));
+        }
+
+        if (fileId) {
+          return `${category} File (${fileId.slice(0, 8)})`;
+        }
+
+        return `${category} File`;
+      };
+
+      const parseGoogleLink = (rawLink) => {
+        try {
+          const url = new URL(rawLink);
+          const validHost =
+            url.hostname === 'drive.google.com' ||
+            url.hostname === 'docs.google.com' ||
+            url.hostname.endsWith('.google.com');
+
+          if (!validHost) {
+            return null;
+          }
+
+          if (!rawLink.includes('drive.google.com') && !rawLink.includes('docs.google.com')) {
+            return null;
+          }
+
+          return url;
+        } catch {
+          return null;
+        }
+      };
+
+      const resolveDownloadLink = (originalLink) => {
+        const url = parseGoogleLink(originalLink);
+        if (!url) {
+          return originalLink;
+        }
+
+        const fileId = getGoogleFileId(url);
+        if (!fileId) {
+          return originalLink;
+        }
+
+        if (url.hostname.includes('drive.google.com') && url.pathname.includes('/file/')) {
+          return `https://drive.google.com/uc?export=download&id=${fileId}`;
+        }
+
+        if (url.pathname.includes('/document/')) {
+          return `https://docs.google.com/document/d/${fileId}/export?format=pdf`;
+        }
+
+        if (url.pathname.includes('/spreadsheets/')) {
+          return `https://docs.google.com/spreadsheets/d/${fileId}/export?format=xlsx`;
+        }
+
+        return originalLink;
+      };
+
+      const createFileRecord = (url, category) => ({
+        link: url.toString(),
+        category,
+        name: extractReadableName(url, category)
+      });
+
+      const createEmptyRow = () => {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 3;
+        cell.className = 'empty-state';
+        cell.textContent = 'No files added yet.';
+        row.appendChild(cell);
+        return row;
+      };
+
+      const createDataRow = (file) => {
+        const row = document.createElement('tr');
+
+        const nameCell = document.createElement('td');
+        const nameLink = document.createElement('a');
+        nameLink.href = file.link;
+        nameLink.target = '_blank';
+        nameLink.rel = 'noopener noreferrer';
+        nameLink.textContent = file.name;
+        nameCell.appendChild(nameLink);
+
+        const categoryCell = document.createElement('td');
+        categoryCell.textContent = file.category;
+
+        const actionCell = document.createElement('td');
+        const downloadBtn = document.createElement('button');
+        downloadBtn.type = 'button';
+        downloadBtn.className = 'download-action';
+        downloadBtn.textContent = 'Download';
+        downloadBtn.addEventListener('click', () => {
+          window.open(resolveDownloadLink(file.link), '_blank', 'noopener');
+        });
+        actionCell.appendChild(downloadBtn);
+
+        row.append(nameCell, categoryCell, actionCell);
+        return row;
+      };
+
+      const renderTable = () => {
+        const files = store.getAll();
+        selectors.tableBody.innerHTML = '';
+
+        if (!files.length) {
+          selectors.tableBody.appendChild(createEmptyRow());
+          return;
+        }
+
+        files.forEach((file) => {
+          selectors.tableBody.appendChild(createDataRow(file));
+        });
+      };
+
+      const handleAddFile = () => {
+        const rawLink = selectors.fileLinkInput.value.trim();
+        const category = selectors.fileCategorySelect.value;
+        const parsedLink = parseGoogleLink(rawLink);
+
+        if (!rawLink || !parsedLink) {
+          window.alert(GOOGLE_LINK_MESSAGE);
+          return;
+        }
+
+        store.add(createFileRecord(parsedLink, category));
+        selectors.fileLinkInput.value = '';
+        renderTable();
+      };
+
+      const bindEvents = () => {
+        selectors.addButton.addEventListener('click', handleAddFile);
+        selectors.fileLinkInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            handleAddFile();
+          }
+        });
+      };
+
+      const init = () => {
+        bindEvents();
+        renderTable();
+      };
+
+      return { init };
+    })();
+
+    fileDownloaderApp.init();
+  </script>
 
 </body>
 </html>
