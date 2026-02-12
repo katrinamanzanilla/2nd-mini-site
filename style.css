@@ -449,7 +449,128 @@ tr {
   border-color: #dfb2ba;
 }
 
-/* ---------- Downloadables ---------- */
+* ---------- Downloadables ---------- */
+.content {
+  padding: 40px;
+}
+
+.downloadables-container {
+  background: #fffafa;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(227, 191, 196, 0.25);
+  padding: 32px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.page-title {
+  margin-bottom: 4px;
+  font-size: 30px;
+}
+
+.downloadables-intro {
+  color: #7a6f6f;
+  margin-bottom: 20px;
+}
+
+.download-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.download-card {
+  background: #fff;
+  border: 1px solid #f1dfe2;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.section-title {
+  font-size: 18px;
+  color: #5b4e4f;
+  margin-bottom: 10px;
+}
+
+.drive-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 999px;
+  background: #e3bfc4;
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  box-shadow: 0 5px 14px rgba(227, 191, 196, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.drive-button:hover,
+.drive-button:focus-visible {
+  background: #d9aeb3;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(227, 191, 196, 0.4);
+}
+
+.file-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(120px, 1fr) auto;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.file-control {
+  width: 100%;
+  border: 1px solid #e8d0d3;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.file-control:focus-visible {
+  outline: 2px solid #e6c5cb;
+  border-color: #dfb2ba;
+}
+
+.download-table-wrap {
+  border: 1px solid #f1dfe2;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.download-table {
+  margin-top: 0;
+}
+
+.download-table thead {
+  background: #fbf2f4;
+}
+
+.download-table tbody tr:hover {
+  background: #fff7f8;
+}
+
+.download-table a {
+  color: #8c5560;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.download-table a:hover,
+.download-table a:focus-visible {
+  text-decoration: underline;
+}
+
+.empty-state {
+  text-align: center;
+  color: #8a7f7f;
+}
+
 .downloadables-header {
   background: linear-gradient(130deg, #f9ebee 0%, #fef9fa 70%);
   border: 1px solid #f0dde0;
@@ -493,6 +614,26 @@ tr {
 }
 
 @media (max-width: 768px) {
+  .content {
+    padding: 20px;
+  }
+
+  .downloadables-container {
+    padding: 20px;
+  }
+
+  .download-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .file-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .file-input-row .drive-button {
+    width: 100%;
+  }
+
   .downloadables-toolbar input {
     margin-left: 0;
     width: 100%;
