@@ -1,504 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Status</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PMG Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<header>
-  <div class="logo">
-    <a href="index.html"><img src="logo.PNG" alt="APEC homes" class="logo-img"></a>
-  </div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="glinks.html">G.Links</a>
-    <a href="downloadables.html">Downloadables</a>
-    <a href="tracker.html">Issue Tracker</a>
-    <a href="projstat.html" class="active">Project Status</a>
-  </nav>
-</header>
-
-<div class="page projstat-page">
-  <section class="projstat-hero">
-    <h2>Project Status Dashboard</h2>
-    <p class="helper-text">Track delivery progress, health, and timeline risk across active IT PM initiatives.</p>
-
-    <div class="quick-guide" role="note" aria-label="How to use project status dashboard">
-      <h3>Quick Start</h3>
-      <ol>
-        <li>Connect a Google-hosted endpoint (optional) to load live project rows.</li>
-        <li>Add or update project records in the table below.</li>
-        <li>Health metrics auto-refresh from current project data.</li>
-      </ol>
+  <header class="navbar">
+    <div class="logo">
+      <a href="index.html" class="active"><img src="logo.PNG" alt="APEC" class="logo-img"></a>
     </div>
-  </section>
 
-  <section class="sheet-config" aria-label="Google project status connection">
-    <h3>Google Sync Link (Optional)</h3>
-    <p class="helper-text">When not connected, data is saved in your browser using local storage.</p>
-    <div class="config-grid">
-      <label for="projectEndpoint">
-        Google Endpoint URL
-        <input id="projectEndpoint" type="url" placeholder="https://<any-google-domain>/...">
-      </label>
-      <div class="sync-actions">
-        <button id="saveProjectEndpoint" type="button" class="small-btn cta-btn">Connect</button>
-        <button id="clearProjectEndpoint" type="button" class="small-btn secondary-btn">Use Local Only</button>
-      </div>
-    </div>
-    <details class="integration-help">
-      <summary>Integration format</summary>
-      <p>Supported endpoints:</p>
-      <ul>
-        <li><code>GET ?action=listProjects</code> returns <code>{ projects: [] }</code></li>
-        <li><code>POST action=createProject</code></li>
-        <li><code>POST action=updateProject</code></li>
-        <li><code>POST action=deleteProject</code></li>
-      </ul>
-    </details>
-    <p id="projectSyncMessage" class="form-message" aria-live="polite"></p>
-  </section>
+    <nav class="nav-links">
+      <a href="index.html">HOME</a>
+      <a href="glinks.html">G.LINKS</a>
+      <a href="downloadables.html">DOWNLOADABLES</a>
+      <a href="tracker.html">ISSUE TRACKER</a>
+      <a href="projstat.html" class="active">PROJECT STATUS</a>
+    </nav>
 
-  <section class="projstat-summary" aria-label="Project health summary">
-    <article class="stat-card"><p>Total Projects</p><h4 id="totalProjects">0</h4></article>
-    <article class="stat-card"><p>On Track</p><h4 id="onTrackProjects">0</h4></article>
-    <article class="stat-card"><p>At Risk</p><h4 id="atRiskProjects">0</h4></article>
-    <article class="stat-card"><p>Off Track</p><h4 id="offTrackProjects">0</h4></article>
-    <article class="stat-card"><p>Avg Progress</p><h4 id="avgProgress">0%</h4></article>
-  </section>
+    <div class="status">APEC HOMES</div>
+  </header>
 
-  <section class="tracker-layout">
-    <form id="projectForm" class="link-form issue-form" aria-label="Add project form">
-      <h3>Add Project Status</h3>
-      <div class="issue-grid">
-        <label for="projectName">
-          Project Name *
-          <input id="projectName" type="text" required placeholder="e.g. ERP Upgrade Rollout">
-        </label>
-        <label for="projectOwner">
-          Owner *
-          <input id="projectOwner" type="text" required placeholder="e.g. Infrastructure Team">
-        </label>
-        <label for="projectPhase">
-          Phase
-          <select id="projectPhase" required>
-            <option value="Planning">Planning</option>
-            <option value="Execution" selected>Execution</option>
-            <option value="Testing">Testing</option>
-            <option value="Closure">Closure</option>
-          </select>
-        </label>
-        <label for="projectTargetDate">
-          Target Date *
-          <input id="projectTargetDate" type="date" required>
-        </label>
-        <label for="projectHealth">
-          Health
-          <select id="projectHealth" required>
-            <option value="On Track" selected>On Track</option>
-            <option value="At Risk">At Risk</option>
-            <option value="Off Track">Off Track</option>
-          </select>
-        </label>
-        <label for="projectProgress">
-          Progress (%)
-          <input id="projectProgress" type="number" min="0" max="100" value="0" required>
-        </label>
-      </div>
-      <div class="form-actions">
-        <button class="small-btn cta-btn" type="submit">+ Add Project</button>
-        <button class="small-btn secondary-btn" id="clearProjectForm" type="button">Clear</button>
-      </div>
-      <p id="projectFormMessage" class="form-message" aria-live="polite"></p>
-    </form>
+  <main class="content status-page">
+    <div class="status-shell">
+      <section class="status-top">
+        <h1 class="page-title">Project Status Overview</h1>
+        <p class="status-intro">Add your Google Sheets links below. The page will copy each sheet into tables, then summarize project counts per RAG type.</p>
 
-    <div class="issue-board">
-      <section class="link-filters issue-filters" aria-label="Project filters">
-        <div class="search-wrap">
-          <label for="projectSearch">Search Projects</label>
-          <input id="projectSearch" type="search" placeholder="Search by project or owner...">
-        </div>
-        <div class="platform-tags" aria-label="Filter projects by health">
-          <button class="platform-filter active" data-health="all" type="button">All</button>
-          <button class="platform-filter" data-health="On Track" type="button">On Track</button>
-          <button class="platform-filter" data-health="At Risk" type="button">At Risk</button>
-          <button class="platform-filter" data-health="Off Track" type="button">Off Track</button>
-        </div>
+        <form id="sheet-source-form" class="status-source-form" autocomplete="off">
+          <label for="sheet-source-input" class="status-source-label">Project Status Google Sheet</label>
+          <div class="status-source-row">
+            <input id="sheet-source-input" class="status-source-input" type="text" placeholder="Paste project status sheet link" required>
+            <button type="submit" id="use-file-button" class="drive-button">VIEW PROJECT</button>
+            <button type="button" id="sheet-source-reset" class="tracker-btn ghost">Reset</button>
+          </div>
+          <p id="sheet-source-feedback" class="copy-feedback" aria-live="polite"></p>
+        </form>
+
+        <form id="timeline-source-form" class="status-source-form status-source-form-inline" autocomplete="off">
+          <label for="timeline-source-input" class="status-source-label">Project Timeline Google Sheet</label>
+          <div class="status-source-row">
+            <input id="timeline-source-input" class="status-source-input" type="text" placeholder="Paste timeline sheet link">
+            <button type="submit" id="use-timeline-button" class="drive-button">VIEW TIMELINE</button>
+            <button type="button" id="timeline-source-reset" class="tracker-btn ghost">Clear Timeline</button>
+          </div>
+          <p id="timeline-source-feedback" class="copy-feedback" aria-live="polite"></p>
+        </form>
       </section>
 
-      <div class="table-wrap">
-        <table aria-label="Project status table">
-          <thead>
-            <tr>
-              <th>Project</th>
-              <th>Owner</th>
-              <th>Phase</th>
-              <th>Health</th>
-              <th>Progress</th>
-              <th>Target Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="projectTableBody"></tbody>
-        </table>
+      <section class="status-kpis" aria-label="Portfolio KPI overview">
+        <article class="metric-card">
+          <span class="metric-label">Total Projects</span>
+          <strong class="metric-value" id="kpi-total-projects">00</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Active Projects</span>
+          <strong class="metric-value" id="kpi-active-projects">00</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">On Track</span>
+          <strong class="metric-value" id="kpi-on-track">00</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">At Risk</span>
+          <strong class="metric-value" id="kpi-at-risk">00</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Delayed</span>
+          <strong class="metric-value" id="kpi-delayed">00</strong>
+        </article>
+      </section>
+
+      <div class="status-scroll-cue" id="status-scroll-cue" role="note" aria-live="polite">
+        <span class="status-scroll-copy">Project status table continues below.</span>
+        <a href="#project-status-table" class="status-scroll-link">Jump to table ↓</a>
       </div>
+
+      <section class="status-grid" aria-label="Project status details">
+        <article class="status-panel full-width" id="google-viewer-wrap" hidden>
+          <div class="panel-title-row">
+            <h2 class="tracker-panel-title">Project Sheet Preview</h2>
+          </div>
+          <div class="sheet-preview-wrap">
+            <iframe
+              id="google-viewer"
+              title="Google project preview"
+              src="about:blank"
+              style="width: 100%; min-height: 340px; border: 0; border-radius: 12px; background: #fff;"
+              loading="lazy">
+            </iframe>
+          </div>
+        </article>
+
+        <article class="status-panel full-width" id="timeline-viewer-wrap" hidden>
+          <div class="panel-title-row">
+            <h2 class="tracker-panel-title">Timeline Sheet Preview</h2>
+          </div>
+          <div class="sheet-preview-wrap">
+            <iframe
+              id="timeline-viewer"
+              title="Google timeline preview"
+              src="about:blank"
+              style="width: 100%; min-height: 340px; border: 0; border-radius: 12px; background: #fff;"
+              loading="lazy">
+            </iframe>
+          </div>
+        </article>
+
+        <article class="status-panel full-width" id="project-status-table" tabindex="-1">
+          <div class="panel-title-row">
+            <h2 class="tracker-panel-title">Project Status Table</h2>
+            <span class="layout-note">Copied directly from Project Status sheet</span>
+          </div>
+          <div class="sheet-preview-wrap">
+            <table class="issues-table">
+              <thead id="status-table-head"></thead>
+              <tbody id="status-table-body"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="status-panel full-width">
+          <div class="panel-title-row">
+            <h2 class="tracker-panel-title">Project Timeline Table</h2>
+            <span class="layout-note">Copied directly from Timeline sheet</span>
+          </div>
+          <div class="sheet-preview-wrap">
+            <table class="issues-table">
+              <thead id="timeline-table-head"></thead>
+              <tbody id="timeline-table-body"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
     </div>
-  </section>
-</div>
+  </main>
 
-<script>
-  const PROJECT_STORAGE_KEY = "itpm_project_status";
-  const PROJECT_ENDPOINT_KEY = "itpm_project_endpoint";
-
-  const GOOGLE_HOST_SUFFIXES = ["google.com", "googleapis.com", "googleusercontent.com", "g.co", "withgoogle.com"];
-
-  const defaults = [
-    {
-      id: crypto.randomUUID(),
-      name: "ERP Upgrade Rollout",
-      owner: "Infrastructure Team",
-      phase: "Execution",
-      health: "On Track",
-      progress: 68,
-      targetDate: "2026-03-30"
-    },
-    {
-      id: crypto.randomUUID(),
-      name: "Data Warehouse Migration",
-      owner: "Data Engineering",
-      phase: "Testing",
-      health: "At Risk",
-      progress: 54,
-      targetDate: "2026-03-15"
-    },
-    {
-      id: crypto.randomUUID(),
-      name: "Endpoint Security Hardening",
-      owner: "Cybersecurity",
-      phase: "Execution",
-      health: "Off Track",
-      progress: 41,
-      targetDate: "2026-02-28"
-    }
-  ];
-
-  const state = {
-    projects: [],
-    search: "",
-    healthFilter: "all",
-    endpoint: ""
-  };
-
-  function isGoogleLink(url) {
-    try {
-      const host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
-      return GOOGLE_HOST_SUFFIXES.some((suffix) => host === suffix || host.endsWith(`.${suffix}`));
-    } catch (error) {
-      return false;
-    }
-  }
-
-  function setMessage(id, text, isError = false) {
-    const el = document.getElementById(id);
-    el.textContent = text;
-    el.classList.toggle("error", isError);
-  }
-
-  function normalizeProject(raw) {
-    return {
-      id: raw.id || crypto.randomUUID(),
-      name: raw.name || "Untitled Project",
-      owner: raw.owner || "Unassigned",
-      phase: raw.phase || "Planning",
-      health: raw.health || "On Track",
-      progress: Math.min(100, Math.max(0, Number(raw.progress) || 0)),
-      targetDate: raw.targetDate || ""
-    };
-  }
-
-  function loadLocalProjects() {
-    const saved = localStorage.getItem(PROJECT_STORAGE_KEY);
-    if (!saved) {
-      localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify(defaults));
-      return [...defaults];
-    }
-
-    try {
-      const parsed = JSON.parse(saved);
-      return Array.isArray(parsed) ? parsed.map(normalizeProject) : [...defaults];
-    } catch (error) {
-      return [...defaults];
-    }
-  }
-
-  function saveLocalProjects(projects) {
-    localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify(projects));
-  }
-
-  async function requestProjectSheet(action, payload = {}, method = "POST") {
-    if (!state.endpoint) throw new Error("Missing endpoint");
-
-    if (method === "GET") {
-      const response = await fetch(`${state.endpoint}?action=${encodeURIComponent(action)}`);
-      if (!response.ok) throw new Error("Fetch failed");
-      return response.json();
-    }
-
-    const response = await fetch(state.endpoint, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, ...payload })
-    });
-
-    if (!response.ok) throw new Error("Write failed");
-    return response.json();
-  }
-
-  function filteredProjects() {
-    const term = state.search.trim().toLowerCase();
-    return state.projects.filter((project) => {
-      const healthMatch = state.healthFilter === "all" || project.health === state.healthFilter;
-      const searchMatch = !term || project.name.toLowerCase().includes(term) || project.owner.toLowerCase().includes(term);
-      return healthMatch && searchMatch;
-    });
-  }
-
-  function healthClass(health) {
-    if (health === "On Track") return "health-good";
-    if (health === "At Risk") return "health-risk";
-    return "health-off";
-  }
-
-  function renderSummary() {
-    const total = state.projects.length;
-    const onTrack = state.projects.filter((p) => p.health === "On Track").length;
-    const atRisk = state.projects.filter((p) => p.health === "At Risk").length;
-    const offTrack = state.projects.filter((p) => p.health === "Off Track").length;
-    const average = total ? Math.round(state.projects.reduce((sum, p) => sum + p.progress, 0) / total) : 0;
-
-    document.getElementById("totalProjects").textContent = total;
-    document.getElementById("onTrackProjects").textContent = onTrack;
-    document.getElementById("atRiskProjects").textContent = atRisk;
-    document.getElementById("offTrackProjects").textContent = offTrack;
-    document.getElementById("avgProgress").textContent = `${average}%`;
-  }
-
-  function renderProjects() {
-    const tbody = document.getElementById("projectTableBody");
-    const rows = filteredProjects();
-
-    if (!rows.length) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="7" class="empty-cell">
-            <strong>No projects found.</strong>
-            <p class="issue-subtext">Try changing search/filter or add a new project.</p>
-          </td>
-        </tr>
-      `;
-      renderSummary();
-      return;
-    }
-
-    tbody.innerHTML = rows.map((project) => {
-      const targetDate = project.targetDate ? new Date(project.targetDate).toLocaleDateString() : "-";
-
-      return `
-        <tr>
-          <td><strong>${project.name}</strong></td>
-          <td>${project.owner}</td>
-          <td>${project.phase}</td>
-          <td>
-            <select class="status-select ${healthClass(project.health)}" data-id="${project.id}" data-role="health">
-              <option value="On Track" ${project.health === "On Track" ? "selected" : ""}>On Track</option>
-              <option value="At Risk" ${project.health === "At Risk" ? "selected" : ""}>At Risk</option>
-              <option value="Off Track" ${project.health === "Off Track" ? "selected" : ""}>Off Track</option>
-            </select>
-          </td>
-          <td>
-            <input class="progress-input" type="number" min="0" max="100" value="${project.progress}" data-id="${project.id}" data-role="progress" aria-label="Update progress percentage">%
-          </td>
-          <td>${targetDate}</td>
-          <td><button class="delete-btn" type="button" data-role="delete" data-id="${project.id}">Delete</button></td>
-        </tr>
-      `;
-    }).join("");
-
-    renderSummary();
-  }
-
-  async function loadProjects() {
-    try {
-      if (state.endpoint) {
-        const data = await requestProjectSheet("listProjects", {}, "GET");
-        const remoteProjects = Array.isArray(data.projects) ? data.projects.map(normalizeProject) : [];
-        if (remoteProjects.length) {
-          state.projects = remoteProjects;
-          renderProjects();
-          setMessage("projectSyncMessage", "Connected to Google endpoint. Live project data loaded.");
-          return;
-        }
-        setMessage("projectSyncMessage", "Connected, but no rows yet. Showing local data.");
-      }
-
-      state.projects = loadLocalProjects();
-      renderProjects();
-    } catch (error) {
-      state.projects = loadLocalProjects();
-      renderProjects();
-      setMessage("projectSyncMessage", "Could not reach Google endpoint. Using local mode.", true);
-    }
-  }
-
-  async function syncCreateProject(project) {
-    if (!state.endpoint) return;
-    await requestProjectSheet("createProject", { project });
-  }
-
-  async function syncUpdateProject(project) {
-    if (!state.endpoint) return;
-    await requestProjectSheet("updateProject", { project });
-  }
-
-  async function syncDeleteProject(id) {
-    if (!state.endpoint) return;
-    await requestProjectSheet("deleteProject", { id });
-  }
-
-  function initEndpoint() {
-    const endpoint = (localStorage.getItem(PROJECT_ENDPOINT_KEY) || "").trim();
-    state.endpoint = endpoint;
-    document.getElementById("projectEndpoint").value = endpoint;
-  }
-
-  document.getElementById("saveProjectEndpoint").addEventListener("click", async () => {
-    const endpoint = document.getElementById("projectEndpoint").value.trim();
-
-    if (endpoint && !isGoogleLink(endpoint)) {
-      setMessage("projectSyncMessage", "Please enter a valid Google link.", true);
-      return;
-    }
-
-    localStorage.setItem(PROJECT_ENDPOINT_KEY, endpoint);
-    state.endpoint = endpoint;
-    setMessage("projectSyncMessage", endpoint ? "Connected. Loading project data..." : "Google sync disabled. Using local mode.");
-    await loadProjects();
-  });
-
-  document.getElementById("clearProjectEndpoint").addEventListener("click", async () => {
-    document.getElementById("projectEndpoint").value = "";
-    state.endpoint = "";
-    localStorage.setItem(PROJECT_ENDPOINT_KEY, "");
-    setMessage("projectSyncMessage", "Local mode enabled.");
-    await loadProjects();
-  });
-
-  document.getElementById("clearProjectForm").addEventListener("click", () => {
-    document.getElementById("projectForm").reset();
-    document.getElementById("projectProgress").value = 0;
-    setMessage("projectFormMessage", "Form cleared.");
-  });
-
-  document.getElementById("projectForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const project = normalizeProject({
-      id: crypto.randomUUID(),
-      name: document.getElementById("projectName").value.trim(),
-      owner: document.getElementById("projectOwner").value.trim(),
-      phase: document.getElementById("projectPhase").value,
-      health: document.getElementById("projectHealth").value,
-      progress: document.getElementById("projectProgress").value,
-      targetDate: document.getElementById("projectTargetDate").value
-    });
-
-    if (!project.name || !project.owner || !project.targetDate) {
-      setMessage("projectFormMessage", "Please complete all required fields.", true);
-      return;
-    }
-
-    state.projects.unshift(project);
-    saveLocalProjects(state.projects);
-    renderProjects();
-    event.target.reset();
-    document.getElementById("projectProgress").value = 0;
-
-    try {
-      await syncCreateProject(project);
-      if (state.endpoint) setMessage("projectSyncMessage", "Project synced to Google endpoint.");
-      setMessage("projectFormMessage", "Project added successfully.");
-    } catch (error) {
-      setMessage("projectFormMessage", "Project saved locally. Google sync failed.", true);
-    }
-  });
-
-  document.getElementById("projectSearch").addEventListener("input", (event) => {
-    state.search = event.target.value;
-    renderProjects();
-  });
-
-  document.querySelectorAll(".platform-filter[data-health]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.healthFilter = button.dataset.health;
-      document.querySelectorAll(".platform-filter[data-health]").forEach((node) => {
-        node.classList.toggle("active", node === button);
-      });
-      renderProjects();
-    });
-  });
-
-  document.getElementById("projectTableBody").addEventListener("change", async (event) => {
-    const rowControl = event.target.closest("[data-id]");
-    if (!rowControl) return;
-
-    const project = state.projects.find((item) => item.id === rowControl.dataset.id);
-    if (!project) return;
-
-    if (rowControl.dataset.role === "health") {
-      project.health = rowControl.value;
-    }
-
-    if (rowControl.dataset.role === "progress") {
-      project.progress = Math.min(100, Math.max(0, Number(rowControl.value) || 0));
-      rowControl.value = project.progress;
-    }
-
-    saveLocalProjects(state.projects);
-    renderProjects();
-
-    try {
-      await syncUpdateProject(project);
-      if (state.endpoint) setMessage("projectSyncMessage", "Project update synced.");
-    } catch (error) {
-      setMessage("projectSyncMessage", "Project updated locally. Google sync failed.", true);
-    }
-  });
-
-  document.getElementById("projectTableBody").addEventListener("click", async (event) => {
-    const button = event.target.closest("button[data-role='delete']");
-    if (!button) return;
-
-    if (!confirm("Delete this project record?")) return;
-
-    const { id } = button.dataset;
-    state.projects = state.projects.filter((project) => project.id !== id);
-    saveLocalProjects(state.projects);
-    renderProjects();
-
-    try {
-      await syncDeleteProject(id);
-      if (state.endpoint) setMessage("projectSyncMessage", "Project deleted from Google endpoint.");
-    } catch (error) {
-      setMessage("projectSyncMessage", "Project deleted locally. Google sync failed.", true);
-    }
-  });
-
-  initEndpoint();
-  loadProjects();
-</script>
-
+  <script src="projstat.js"></script>
 </body>
 </html>
