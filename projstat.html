@@ -3,142 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PMG Portal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>Project Status</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="navbar">
-    <div class="logo">
-      <a href="index.html" class="active"><img src="logo.PNG" alt="APEC" class="logo-img"></a>
-    </div>
 
-    <nav class="nav-links">
-      <a href="index.html">HOME</a>
-      <a href="glinks.html">G.LINKS</a>
-      <a href="downloadables.html">DOWNLOADABLES</a>
-      <a href="tracker.html">ISSUE TRACKER</a>
-      <a href="projstat.html" class="active">PROJECT STATUS</a>
-    </nav>
+<header>
+  <div class="logo">
+    <a href="index.html"><img src="logo.PNG" alt="APEC Homes" class="logo-img"></a>
+  </div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="glinks.html">G.Links</a>
+    <a href="downloadables.html">Downloadables</a>
+    <a href="tracker.html">Issue Tracker</a>
+    <a href="projstat.html" class="active">Project Status</a>
+  </nav>
+</header>
 
-    <div class="status">APEC HOMES</div>
-  </header>
+<div class="page projstat-page">
+  <section class="projstat-hero">
+    <h2>Project Status Overview</h2>
+    <p class="helper-text">Paste a Google Sheets link (or raw sheet ID) to load project status data with live summary and filters.</p>
 
-  <main class="content status-page">
-    <div class="status-shell">
-      <section class="status-top">
-        <h1 class="page-title">Project Status Overview</h1>
-        <p class="status-intro">Add your Google Sheets links below. The page will copy each sheet into tables, then summarize project counts per RAG type.</p>
-
-        <form id="sheet-source-form" class="status-source-form" autocomplete="off">
-          <label for="sheet-source-input" class="status-source-label">Project Status Google Sheet</label>
-          <div class="status-source-row">
-            <input id="sheet-source-input" class="status-source-input" type="text" placeholder="Paste project status sheet link" required>
-            <button type="submit" id="use-file-button" class="drive-button">VIEW PROJECT</button>
-            <button type="button" id="sheet-source-reset" class="tracker-btn ghost">Reset</button>
-          </div>
-          <p id="sheet-source-feedback" class="copy-feedback" aria-live="polite"></p>
-        </form>
-
-        <form id="timeline-source-form" class="status-source-form status-source-form-inline" autocomplete="off">
-          <label for="timeline-source-input" class="status-source-label">Project Timeline Google Sheet</label>
-          <div class="status-source-row">
-            <input id="timeline-source-input" class="status-source-input" type="text" placeholder="Paste timeline sheet link">
-            <button type="submit" id="use-timeline-button" class="drive-button">VIEW TIMELINE</button>
-            <button type="button" id="timeline-source-reset" class="tracker-btn ghost">Clear Timeline</button>
-          </div>
-          <p id="timeline-source-feedback" class="copy-feedback" aria-live="polite"></p>
-        </form>
-      </section>
-
-      <section class="status-kpis" aria-label="Portfolio KPI overview">
-        <article class="metric-card">
-          <span class="metric-label">Total Projects</span>
-          <strong class="metric-value" id="kpi-total-projects">00</strong>
-        </article>
-        <article class="metric-card">
-          <span class="metric-label">Active Projects</span>
-          <strong class="metric-value" id="kpi-active-projects">00</strong>
-        </article>
-        <article class="metric-card">
-          <span class="metric-label">On Track</span>
-          <strong class="metric-value" id="kpi-on-track">00</strong>
-        </article>
-        <article class="metric-card">
-          <span class="metric-label">At Risk</span>
-          <strong class="metric-value" id="kpi-at-risk">00</strong>
-        </article>
-        <article class="metric-card">
-          <span class="metric-label">Delayed</span>
-          <strong class="metric-value" id="kpi-delayed">00</strong>
-        </article>
-      </section>
-
-      <div class="status-scroll-cue" id="status-scroll-cue" role="note" aria-live="polite">
-        <span class="status-scroll-copy">Project status table continues below.</span>
-        <a href="#project-status-table" class="status-scroll-link">Jump to table ↓</a>
+    <form id="sheet-source-form" class="status-source-form" autocomplete="off">
+      <label for="sheet-source-input" class="status-source-label">Google Sheets Link or Sheet ID</label>
+      <div class="status-source-row">
+        <input id="sheet-source-input" class="status-source-input" type="text" placeholder="https://docs.google.com/spreadsheets/d/..." required>
+        <button type="submit" id="use-file-button" class="drive-button">View Data</button>
+        <button type="button" id="sheet-source-reset" class="small-btn secondary-btn">Reset</button>
       </div>
+      <p id="sheet-source-feedback" class="copy-feedback" aria-live="polite"></p>
+    </form>
+  </section>
 
-      <section class="status-grid" aria-label="Project status details">
-        <article class="status-panel full-width" id="google-viewer-wrap" hidden>
-          <div class="panel-title-row">
-            <h2 class="tracker-panel-title">Project Sheet Preview</h2>
-          </div>
-          <div class="sheet-preview-wrap">
-            <iframe
-              id="google-viewer"
-              title="Google project preview"
-              src="about:blank"
-              style="width: 100%; min-height: 340px; border: 0; border-radius: 12px; background: #fff;"
-              loading="lazy">
-            </iframe>
-          </div>
-        </article>
+  <section class="status-kpis" aria-label="Project status summary">
+    <article class="metric-card">
+      <span class="metric-label">Total Projects</span>
+      <strong class="metric-value" id="kpi-total-projects">0</strong>
+    </article>
+    <article class="metric-card">
+      <span class="metric-label">Total Milestones</span>
+      <strong class="metric-value" id="kpi-total-milestones">0</strong>
+    </article>
+  </section>
 
-        <article class="status-panel full-width" id="timeline-viewer-wrap" hidden>
-          <div class="panel-title-row">
-            <h2 class="tracker-panel-title">Timeline Sheet Preview</h2>
-          </div>
-          <div class="sheet-preview-wrap">
-            <iframe
-              id="timeline-viewer"
-              title="Google timeline preview"
-              src="about:blank"
-              style="width: 100%; min-height: 340px; border: 0; border-radius: 12px; background: #fff;"
-              loading="lazy">
-            </iframe>
-          </div>
-        </article>
-
-        <article class="status-panel full-width" id="project-status-table" tabindex="-1">
-          <div class="panel-title-row">
-            <h2 class="tracker-panel-title">Project Status Table</h2>
-            <span class="layout-note">Copied directly from Project Status sheet</span>
-          </div>
-          <div class="sheet-preview-wrap">
-            <table class="issues-table">
-              <thead id="status-table-head"></thead>
-              <tbody id="status-table-body"></tbody>
-            </table>
-          </div>
-        </article>
-
-        <article class="status-panel full-width">
-          <div class="panel-title-row">
-            <h2 class="tracker-panel-title">Project Timeline Table</h2>
-            <span class="layout-note">Copied directly from Timeline sheet</span>
-          </div>
-          <div class="sheet-preview-wrap">
-            <table class="issues-table">
-              <thead id="timeline-table-head"></thead>
-              <tbody id="timeline-table-body"></tbody>
-            </table>
-          </div>
-        </article>
-      </section>
+  <section class="status-panel" aria-label="Project status filters">
+    <div class="panel-title-row">
+      <h3 class="section-title">Filters</h3>
     </div>
-  </main>
+    <div class="status-filters-row">
+      <label class="status-filter-item" for="system-filter">
+        <span>System</span>
+        <select id="system-filter">
+          <option value="">All Systems</option>
+        </select>
+      </label>
+      <label class="status-filter-item" for="milestone-filter">
+        <span>Milestone</span>
+        <select id="milestone-filter">
+          <option value="">All Milestones</option>
+        </select>
+      </label>
+      <label class="status-filter-item" for="sheet-search">
+        <span>Search</span>
+        <input id="sheet-search" type="search" placeholder="Search system, milestone, developer, manager" />
+      </label>
+    </div>
+  </section>
 
-  <script src="projstat.js"></script>
+  <section class="status-panel" id="project-status-table" tabindex="-1" aria-label="Project status table section">
+    <div class="panel-title-row">
+      <h3 class="section-title">Project Status Table</h3>
+      <span class="layout-note">Rows and columns mirror the source sheet</span>
+    </div>
+    <div class="table-wrap status-table-scroll" role="region" aria-label="Project status table scroll container">
+      <table class="issues-table" aria-label="Project status table">
+        <thead id="status-table-head"></thead>
+        <tbody id="status-table-body">
+          <tr><td class="empty-state" colspan="1">Paste a Google Sheet and click View Data.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script src="projstat.js"></script>
 </body>
 </html>
